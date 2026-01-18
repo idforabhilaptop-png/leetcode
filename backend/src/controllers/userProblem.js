@@ -1,10 +1,10 @@
 
 
-// const User = require("../models/user");
 // const Submission = require("../models/submission");
 // const SolutionVideo = require("../models/solutionVideo")
 
 const { default: Problem } = require("../models/problems");
+const { default: User } = require("../models/users");
 const { getLanguageById, submitBatch, submitToken } = require("../utils/problemUtility");
 
 const createProblem = async (req, res) => {
@@ -218,7 +218,7 @@ const solvedAllProblembyUser = async (req, res) => {
 
   }
   catch (err) {
-    res.status(500).send("Server Error");
+    res.status(500).send("Error:"+err);
   }
 }
 

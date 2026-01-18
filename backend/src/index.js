@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser"
 import authRouter from "./routes/userAuth";
 import redisClient from "./config/reddis_connect";
 import { problemRouter } from "./routes/problemCreation";
+import submitRouter from "./routes/submit";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -12,6 +13,7 @@ app.use(express.json())
 app.use(cookieParser())
 app.use('/user', authRouter)
 app.use('/problem', problemRouter)
+app.use('/submission', submitRouter)
 
 
 
