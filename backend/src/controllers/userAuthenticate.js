@@ -108,8 +108,8 @@ const deleteProfile = async (req, res) => {
 
     try {
         const userId = req.result._id
-        await User.findByIdAndDelete(userId)
         await Submission.deleteMany({ userId })
+        await User.findByIdAndDelete(userId)
         res.status(200).send("Deleted Successfully")
     }
     catch (err) {
