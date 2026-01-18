@@ -1,4 +1,5 @@
 import redisClient from "../config/reddis_connect"
+import Submission from "../models/submission"
 import User from "../models/users"
 import validate from "../utils/validator"
 import bcrypt from "bcrypt"
@@ -103,5 +104,18 @@ const getProfile = async (req, res) => {
     }
 }
 
+const deleteProfile = async (req, res) => {
 
-export { register, login, logout, adminRegister, getProfile }
+    try {
+        const userId = req.result._id
+        await User.findByIdAndDelete(userId)
+        await Submission.deleteMany({ userId })
+        res.status(200).send("Deleted Successfully")
+    }
+    catch (err) {
+        res.status(500).send("Error :", err)
+
+    }
+}
+
+export { register, login, logout, adminRegister, getProfile, deleteProfile }

@@ -4,6 +4,7 @@
 // const SolutionVideo = require("../models/solutionVideo")
 
 const { default: Problem } = require("../models/problems");
+const { default: Submission } = require("../models/submission");
 const { default: User } = require("../models/users");
 const { getLanguageById, submitBatch, submitToken } = require("../utils/problemUtility");
 
@@ -222,26 +223,25 @@ const solvedAllProblembyUser = async (req, res) => {
   }
 }
 
-// const submittedProblem = async(req,res)=>{
 
-//   try{
+const submittedProblem = async(req,res)=>{
 
-//     const userId = req.result._id;
-//     const problemId = req.params.pid;
+  try{
 
-//    const ans = await Submission.find({userId,problemId});
+    const userId = req.result._id;
+    const problemId = req.params.pid;
 
-//   if(ans.length==0)
-//     res.status(200).send("No Submission is persent");
+   const ans = await Submission.find({userId,problemId});
 
-//   res.status(200).send(ans);
+  if(ans.length==0)
+    res.status(200).send("No Submission is persent");
 
-//   }
-//   catch(err){
-//      res.status(500).send("Internal Server Error");
-//   }
-// }
+  res.status(200).send(ans);
 
+  }
+  catch(err){
+     res.status(500).send("Internal Server Error :",err);
+  }
+}
 
-
-module.exports = { createProblem, updateProblem ,deleteProblem,getProblemById,getAllProblem,solvedAllProblembyUser/*,submittedProblem*/ };
+module.exports = { createProblem, updateProblem ,deleteProblem,getProblemById,getAllProblem,solvedAllProblembyUser,submittedProblem };
