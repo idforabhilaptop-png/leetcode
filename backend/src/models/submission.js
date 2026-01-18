@@ -52,7 +52,7 @@ const submissionSchema = new Schema({
 });
 
 
-submissionSchema.index({userId:1 , problemId:1});
+submissionSchema.index({userId:1 , problemId:1});   //compound indexing 
 
 
 const Submission = mongoose.model('submission',submissionSchema);
