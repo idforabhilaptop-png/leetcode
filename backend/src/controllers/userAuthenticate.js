@@ -17,9 +17,18 @@ const register = async (req, res) => {
 
         const user = await User.create(req.body)
 
+        const replyToFrontend = {
+            id: user._id,
+            firstName: user.firstName,
+            emailId: user.emailId,
+        }
+
         const token = jwt.sign({ _id: user._id, emailId: user.emailId, role: 'user' }, process.env.JWT_KEY, { expiresIn: '1h' })
         res.cookie('token', token, { maxAge: 60 * 60 * 1000 })
-        res.status(201).send({ message: "User Registered Successfully" })
+        res.status(201).json({
+            user: replyToFrontend,
+            message: "Registered Successfully",
+        })
 
     }
     catch (err) {
@@ -67,9 +76,18 @@ const login = async (req, res) => {
             throw new Error("Invalid Credentials")
         }
 
+        const replyToFrontend = {
+            id: user._id,
+            firstName: user.firstName,
+            emailId: user.emailId,
+
+        }
         const token = jwt.sign({ _id: user._id, emailId: user.emailId, role: user.role }, process.env.JWT_KEY, { expiresIn: '1h' })
         res.cookie('token', token, { maxAge: 60 * 60 * 1000 })
-        res.status(200).send({ message: "Login Successful" })
+        res.status(200).json({
+            user: replyToFrontend,
+            message: "Logged in Successfully",
+        })
 
     }
     catch (err) {

@@ -1,0 +1,64 @@
+{
+  "hash": "d4e87523",
+  "configHash": "a65a825b",
+  "lockfileHash": "6c4eebbd",
+  "browserHash": "8890afda",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/.pnpm/react@19.2.3/node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "4a3e4316",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/.pnpm/react-dom@19.2.3_react@19.2.3/node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "4114fa9f",
+      "needsInterop": true
+    },
+    "react-router": {
+      "src": "../../node_modules/.pnpm/react-router@7.12.0_react-d_7534f16254acf5b31bead32625b21a05/node_modules/react-router/dist/development/index.mjs",
+      "file": "react-router.js",
+      "fileHash": "fce9c199",
+      "needsInterop": false
+    },
+    "react-hook-form": {
+      "src": "../../node_modules/.pnpm/react-hook-form@7.71.1_react@19.2.3/node_modules/react-hook-form/dist/index.esm.mjs",
+      "file": "react-hook-form.js",
+      "fileHash": "548cdb59",
+      "needsInterop": false
+    },
+    "@hookform/resolvers/zod": {
+      "src": "../../node_modules/.pnpm/@hookform+resolvers@5.2.2_r_c71c95126efc210b1ac510b1d96c72c6/node_modules/@hookform/resolvers/zod/dist/zod.mjs",
+      "file": "@hookform_resolvers_zod.js",
+      "fileHash": "e3b99cc9",
+      "needsInterop": false
+    },
+    "zod": {
+      "src": "../../node_modules/.pnpm/zod@4.3.5/node_modules/zod/index.js",
+      "file": "zod.js",
+      "fileHash": "91eea76f",
+      "needsInterop": false
+    },
+    "lucide-react": {
+      "src": "../../node_modules/.pnpm/lucide-react@0.562.0_react@19.2.3/node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "de057a06",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-LBHCEM4W": {
+      "file": "chunk-LBHCEM4W.js"
+    },
+    "chunk-XSSKUCF5": {
+      "file": "chunk-XSSKUCF5.js"
+    },
+    "chunk-I4BD4AGR": {
+      "file": "chunk-I4BD4AGR.js"
+    },
+    "chunk-G3PMV62Z": {
+      "file": "chunk-G3PMV62Z.js"
+    }
+  }
+}
