@@ -1,11 +1,14 @@
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Eye, EyeOff} from "lucide-react";
-import { Link } from "react-router"
-import leetcodeLogo from "../assets/leetcode2.png";
+import { Eye, EyeOff } from "lucide-react";
+import { Link, useNavigate } from "react-router"
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { loginUser } from "../../authSlice";
+import { leetcodeLogo } from "../../assets/images";
 
 
 
@@ -16,21 +19,29 @@ const loginSchema = z.object({
 });
 
 const Login = () => {
-  
+
   const [showPassword, setShowPassword] = useState(false);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { isAuthenticated, loading} = useSelector((state) => state.auth);
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset,
   } = useForm({
     resolver: zodResolver(loginSchema),
   });
 
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
+
   const onSubmit = (data) => {
-    console.log(data); // { emailId, password }
-    reset();
+    dispatch(loginUser(data));
   };
 
   return (
@@ -94,12 +105,14 @@ const Login = () => {
           </div>
 
           <button
-            className="mt-2 w-[80%] h-10 rounded-md bg-black text-white
-                        hover:bg-gray-800 active:scale-95 transition"
+            disabled={loading}
+            className={`mt-2 w-[80%] h-10 rounded-md text-white transition
+            ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800 active:scale-95"}`}
             type="submit"
           >
-            Log in
+            {loading ? "Please Wait..." : "Login"}
           </button>
+
 
           {/* Extra UX */}
           <p className="text-sm text-gray-500">

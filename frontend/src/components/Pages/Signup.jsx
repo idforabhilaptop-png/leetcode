@@ -1,10 +1,13 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Link } from "react-router"
-import { useState } from "react";
-import { Eye, EyeOff} from "lucide-react";
-import leetcodeLogo from "../assets/leetcode2.png";
+import { Link, useNavigate } from "react-router"
+import { useEffect, useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { registerUser } from "../../authSlice";
+import { leetcodeLogo } from "../../assets/images";
 
 
 const signupSchema = z.object({
@@ -14,20 +17,33 @@ const signupSchema = z.object({
 });
 
 const Signup = () => {
-     const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const dispatch = useDispatch();
+    const navigate = useNavigate();
+    const { isAuthenticated, loading } = useSelector((state) => state.auth); // Removed error as it wasn't used
+
+
     const {
         register,
         handleSubmit,
         formState: { errors },
-        reset,
     } = useForm({
         resolver: zodResolver(signupSchema),
     });
 
+
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            navigate('/');
+        }
+    }, [isAuthenticated, navigate]);
+
     const onSubmit = (data) => {
-        console.log(data);
-        reset();
+        dispatch(registerUser(data));
+
     };
+
 
     return (
         <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
@@ -98,7 +114,7 @@ const Signup = () => {
                         >
                             {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                         </button>
-                        
+
                         <p className="text-xs text-gray-400">
                             Minimum 8 characters
                         </p>
@@ -108,11 +124,12 @@ const Signup = () => {
                     </div>
 
                     <button
-                        className="mt-2 w-[80%] h-10 rounded-md bg-black text-white 
-                        hover:bg-gray-800 active:scale-95 transition"
+                        disabled={loading}
+                        className={`mt-2 w-[80%] h-10 rounded-md text-white transition
+                        ${loading ? "bg-gray-400 cursor-not-allowed" : "bg-black hover:bg-gray-800 active:scale-95"}`}
                         type="submit"
                     >
-                        Sign up
+                        {loading ? "Signing up..." : "Sign up"}
                     </button>
 
                     <p className="text-sm text-gray-500">
