@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Eye, EyeOff} from "lucide-react";
 import { Link } from "react-router"
+import leetcodeLogo from "../assets/leetcode2.png";
 
 
 
@@ -38,7 +39,7 @@ const Login = () => {
 
         <img
           className="w-40 h-auto"
-          src="./src/assets/leetcode2.png"
+          src={leetcodeLogo}
           alt="leetcode"
         />
 

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Link } from "react-router"
 import { useState } from "react";
 import { Eye, EyeOff} from "lucide-react";
+import leetcodeLogo from "../assets/leetcode2.png";
 
 
 const signupSchema = z.object({
@@ -34,7 +35,7 @@ const Signup = () => {
 
                 <img
                     className="w-40 h-auto"
-                    src="./src/assets/leetcode2.png"
+                    src={leetcodeLogo}
                     alt="leetcode"
                 />
 
