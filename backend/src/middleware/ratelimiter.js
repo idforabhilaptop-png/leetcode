@@ -1,4 +1,4 @@
-import redisClient from "../config/redis_connect.js";
+import redisClient from "../config/reddis_connect";
 
 const submitCodeRateLimiter = async (req, res, next) => {
     const userId = req.result._id;
