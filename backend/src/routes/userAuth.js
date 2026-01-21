@@ -14,19 +14,19 @@ authRouter.post('/logout', userMiddleware, logout)
 authRouter.get('/getProfile', getProfileMiddleware, getProfile)
 authRouter.delete('/deleteProfile', userMiddleware, deleteProfile);
 
-authRouter.get('/check', userMiddleware, (res, req) => {
+authRouter.get('/check', userMiddleware, (req, res) => {
+  const reply = {
+    id: req.result._id,
+    firstName: req.result.firstName,
+    emailId: req.result.emailId,
+  };
 
-    const reply = {
-        id: req.result._id,
-        firstName: req.result.firstName,
-        emailId: req.result.emailId,
-    }
+  res.status(200).json({
+    user: reply,
+    message: "Valid User",
+  });
+});
 
-    res.status(200).json({
-        user: reply,
-        message: "Valid User",
-    })
-})
 
 
 export default authRouter;

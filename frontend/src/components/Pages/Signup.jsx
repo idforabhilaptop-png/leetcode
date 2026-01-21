@@ -35,7 +35,7 @@ const Signup = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            navigate('/');
+            navigate('/problems');
         }
     }, [isAuthenticated, navigate]);
 

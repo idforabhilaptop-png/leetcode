@@ -23,7 +23,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isAuthenticated, loading} = useSelector((state) => state.auth);
+  const { isAuthenticated, loading, error} = useSelector((state) => state.auth);
 
   const {
     register,
@@ -36,7 +36,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate('/');
+      navigate('/problems');
     }
   }, [isAuthenticated, navigate]);
 
@@ -58,6 +58,13 @@ const Login = () => {
           onSubmit={handleSubmit(onSubmit)}
           className="w-full flex flex-col items-center gap-5"
         >
+          {/* Error Message */}
+          {error && (
+            <div className="w-[80%] bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-md text-sm">
+              Invalid credentials. Please try again.
+            </div>
+          )}
+
           {/* Email */}
           <div className="w-[80%]">
             <label className="text-sm text-gray-600">
