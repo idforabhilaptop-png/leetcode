@@ -6,6 +6,7 @@ import { useEffect } from "react";
 import HomePage from "./components/Pages/HomePage";
 import Login from "./components/Pages/Login";
 import Signup from "./components/Pages/Signup";
+import AfterLogin from "./components/Pages/AfterLogin";
 
 const App = () => {
 
@@ -24,17 +25,19 @@ const App = () => {
   }
 
   return (
-    <div>
+    <Routes>
+      {/* Public */}
+      <Route path="/" element={<HomePage />} />
 
-      <Routes>
-        <Route path="/" element={<HomePage></HomePage>}></Route>
-        <Route path="/login" element={isAuthenticated ? <Navigate to="/" /> : <Login></Login>}></Route>
-        <Route path="/signup" element={isAuthenticated ? <Navigate to="/" /> : <Signup></Signup>}></Route>
-      </Routes>
-    </div>
+      {/* Auth pages */}
+      <Route path="/login" element={isAuthenticated ? <Navigate to="/problems" replace /> : <Login />} />
+      <Route path="/signup" element={isAuthenticated ? <Navigate to="/problems" replace /> : <Signup />}/>
 
-  )
-}
+      {/* Private */}
+      <Route path="/problems" element={ isAuthenticated ? <AfterLogin /> : <Navigate to="/login" replace />}/>
+    </Routes>
+  );
+};
 
-export default App
+export default App;
 
