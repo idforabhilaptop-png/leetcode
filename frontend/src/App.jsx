@@ -6,7 +6,8 @@ import { useEffect } from "react";
 import HomePage from "./components/Pages/HomePage";
 import Login from "./components/Pages/Login";
 import Signup from "./components/Pages/Signup";
-import AfterLogin from "./components/Pages/AfterLogin";
+import ProblemPage from "./components/Pages/ProblemPage";
+import AdminPanel from "./components/Pages/AdminPanel";
 
 const App = () => {
 
@@ -34,8 +35,9 @@ const App = () => {
       <Route path="/signup" element={isAuthenticated ? <Navigate to="/problems" replace /> : <Signup />}/>
 
       {/* Private */}
-      <Route path="/problems" element={ isAuthenticated ? <AfterLogin /> : <Navigate to="/login" replace />}/>
-    </Routes>
+      <Route path="/problems" element={ isAuthenticated ? <ProblemPage /> : <Navigate to="/login" replace />}/>
+      <Route path = '/admin_panel/*' element={isAuthenticated ? <AdminPanel/> : <Navigate to='/login' replace />}/>
+      </Routes>
   );
 };
 
