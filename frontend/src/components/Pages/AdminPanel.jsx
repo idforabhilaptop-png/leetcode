@@ -11,17 +11,7 @@ import {
 } from 'lucide-react';
 import axiosClient from '../../utils/axiosClient';
 
-// // Mock axios client since we can't import external modules
-// const axiosClient = {
-//   post: async (data) => {
-//     console.log('POST to:', 'http://localhost:3000');
-//     console.log('Data:', JSON.stringify(data, null, 2));
-//     // Simulate API call
-//     return new Promise((resolve) => {
-//       setTimeout(() => resolve({ data: { success: true } }), 1000);
-//     });
-//   }
-// };
+
 
 // 1. Zod Schema - FIXED to match backend
 const problemSchema = z.object({
