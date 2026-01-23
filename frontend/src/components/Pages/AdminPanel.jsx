@@ -491,7 +491,7 @@ const AdminPanel = () => {
           <Link to="/" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="Dashboard">
             <LayoutGrid size={24} />
           </Link>
-          <Link to="/create-problem" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="New Problem">
+          <Link to="create-problem" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="New Problem">
             <PlusCircle size={24} />
           </Link>
           <div className="p-4 rounded-2xl text-slate-200 cursor-not-allowed" title="Databases Locked">
