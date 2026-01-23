@@ -6,7 +6,9 @@ import { useNavigate } from 'react-router';
 const AdminUpdateDelete = () => {
     const [problems, setProblems] = useState([]);
     const [loading, setLoading] = useState(true);
+    // eslint-disable-next-line no-unused-vars
     const [isDeleting, setIsDeleting] = useState(null);
+    // eslint-disable-next-line no-unused-vars
     const [isUpdating, setIsUpdating] = useState(null)
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -21,13 +23,10 @@ const AdminUpdateDelete = () => {
 
     const handleUpdate = async (id) => {
         try {
-            setIsUpdating(id);
             navigate(`/admin_panel/update/${id}`)
         } catch (err) {
             setError('Failed to Update problem');
             console.error(err);
-        } finally {
-            setIsUpdating(null);
         }
     }
 
@@ -52,14 +51,12 @@ const AdminUpdateDelete = () => {
         if (!window.confirm('Are you sure you want to delete this problem?')) return;
 
         try {
-            setIsDeleting(id);
             await axiosClient.delete(`/problem/delete/${id}`);
-            setProblems(prev => prev.filter(problem => problem._id !== id));
+            setProblems(problems.filter(problem => problem._id !== id));
+
         } catch (err) {
             setError('Failed to delete problem');
             console.error(err);
-        } finally {
-            setIsDeleting(null);
         }
     };
 

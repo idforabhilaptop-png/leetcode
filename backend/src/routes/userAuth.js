@@ -29,6 +29,4 @@ authRouter.get('/check', userMiddleware, (req, res) => {
   });
 });
 
-
-
 export default authRouter;
