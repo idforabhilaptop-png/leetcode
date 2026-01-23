@@ -16,6 +16,7 @@ const userMiddleware = async (req, res, next) => {
 
         const result = await User.findById(_id)
 
+
         if (!result)
             throw new Error("user does not exist")
 

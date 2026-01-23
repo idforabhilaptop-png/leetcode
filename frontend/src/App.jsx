@@ -13,14 +13,14 @@ import CompilerPage from "./components/Pages/CompilerPage";
 const App = () => {
 
   const dispatch = useDispatch();
-  const { isAuthenticated, loading } = useSelector((state) => state.auth);
+  const { isAuthenticated, user , authChecked } = useSelector((state) => state.auth);
 
   // check initial authentication
   useEffect(() => {
     dispatch(checkAuth());
   }, [dispatch]);
 
-  if (loading) {
+  if (!authChecked) {
     return <div className="min-h-screen flex items-center justify-center">
       <span className="loading loading-spinner loading-lg"></span>
     </div>;
@@ -37,7 +37,7 @@ const App = () => {
 
       {/* Private */}
       <Route path="/problems" element={isAuthenticated ? <ProblemPage /> : <Navigate to="/login" replace />} />
-      <Route path='/admin_panel/*' element={isAuthenticated ? <AdminPanel /> : <Navigate to='/login' replace />} />
+      <Route path='/admin_panel/*' element={isAuthenticated && user?.role==='admin' ? <AdminPanel /> : <Navigate to='/login' replace />} />
       <Route path='problem/:problemId' element={<CompilerPage />} />
     </Routes>
   );
