@@ -217,7 +217,7 @@ const authSlice = createSlice({
   initialState: {
     user: null,
     isAuthenticated: false,
-    loading: false,
+    loading: true,
     authChecked: false, // 🔑 VERY IMPORTANT
     error: null,
   },
@@ -294,3 +294,4 @@ const authSlice = createSlice({
 });
 
 export default authSlice.reducer;
+

@@ -74,25 +74,31 @@ const createProblem = async (req, res) => {
 
 
 const updateProblem = async (req, res) => {
-
   const { id } = req.params;
-  const { title, description, difficulty, tags,
-    visibleTestCases, hiddenTestCases, startCode,
-    referenceSolution, problemCreator
+  const { 
+    title, 
+    description, 
+    difficulty, 
+    tags,
+    visibleTestCases, 
+    invisibleTestCases, 
+    startCode,
+    referenceSolution, 
   } = req.body;
 
   try {
-
     if (!id) {
-      return res.status(400).send("Missing ID Field");
+      return res.status(400).json({ error: "Missing ID Field" });
     }
 
     const DsaProblem = await Problem.findById(id);
     if (!DsaProblem) {
-      return res.status(404).send("ID is not persent in server");
+      return res.status(404).json({ error: "Problem not found" });
     }
 
-    for (const { language, completeCode } of referenceSolution) {
+    // Validate all reference solutions against visible test cases
+    for (let i = 0; i < referenceSolution.length; i++) {
+      const { language, completeCode } = referenceSolution[i];
 
       const languageId = getLanguageById(language);
 
@@ -103,27 +109,63 @@ const updateProblem = async (req, res) => {
         expected_output: testcase.output
       }));
 
-
       const submitResult = await submitBatch(submissions);
       const resultToken = submitResult.map((value) => value.token);
       const testResult = await submitToken(resultToken);
 
-      for (const test of testResult) {
-        if (test.status_id != 3) {
-          return res.status(400).send("Error Occured");
+      // Check each test result with detailed error reporting
+      for (let j = 0; j < testResult.length; j++) {
+        const test = testResult[j];
+        if (test.status_id !== 3) {
+          // Status ID 3 = Accepted
+          // Provide detailed error information
+          return res.status(400).json({
+            error: "Reference solution validation failed",
+            details: {
+              language,
+              testCaseIndex: j,
+              input: visibleTestCases[j].input,
+              expectedOutput: visibleTestCases[j].output,
+              actualOutput: test.stdout || test.stderr || "No output",
+              status: test.status?.description || "Unknown error",
+              statusId: test.status_id
+            }
+          });
         }
       }
-
     }
 
-    const newProblem = await Problem.findByIdAndUpdate(id, { ...req.body }, { runValidators: true, new: true });
+    // Build update object with only the fields that should be updated
+    const updateData = {
+      title,
+      description,
+      difficulty,
+      tags,
+      visibleTestCases,
+      invisibleTestCases,
+      startCode,
+      referenceSolution,
+    };
 
-    res.status(200).send(newProblem);
+    const newProblem = await Problem.findByIdAndUpdate(
+      id, 
+      updateData, 
+      { runValidators: true, new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Problem updated successfully",
+      problem: newProblem
+    });
+  } catch (err) {
+    console.error("Update problem error:", err);
+    res.status(500).json({ 
+      error: "Internal server error", 
+      message: err.message 
+    });
   }
-  catch (err) {
-    res.status(500).send("Error: " + err);
-  }
-}
+};
 
 const deleteProblem = async (req, res) => {
 

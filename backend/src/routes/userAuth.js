@@ -15,6 +15,7 @@ authRouter.get('/getProfile', getProfileMiddleware, getProfile)
 authRouter.delete('/deleteProfile', userMiddleware, deleteProfile);
 
 authRouter.get('/check', userMiddleware, (req, res) => {
+
   const reply = {
     id: req.result._id,
     firstName: req.result.firstName,

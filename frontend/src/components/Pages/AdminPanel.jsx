@@ -1,15 +1,19 @@
 
 import { useState } from 'react';
-import {  Routes, Route, Link, useNavigate } from 'react-router';
+import { Routes, Route, Link, useNavigate } from 'react-router';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   Plus, Trash2, Code2, FileText, Beaker, ChevronRight, Info,
   CheckCircle2, AlertCircle, Code, Layout, LayoutGrid,
-  Database, Users, Settings, PlusCircle, ArrowLeft, Send, X
+  Database, Users, Settings, PlusCircle, ArrowLeft, Send, X,
+  Pencil,
+  Trash
 } from 'lucide-react';
 import axiosClient from '../../utils/axiosClient';
+import AdminUpdateDelete from '../admin/AdminUpdateDelete';
+import UpdatePanel from '../admin/UpdatePanel';
 
 
 
@@ -19,8 +23,8 @@ const problemSchema = z.object({
   description: z.string().min(1, 'Description is required'),
   difficulty: z.enum(["Easy", "Medium", "Hard"]),
   tags: z.array(z.enum([
-    "Array", "String", "Dynamic Programming", "Graph", "Tree", 
-    "Math", "Sorting", "Searching", "Backtracking", "Greedy", 
+    "Array", "String", "Dynamic Programming", "Graph", "Tree",
+    "Math", "Sorting", "Searching", "Backtracking", "Greedy",
     "Linked List", "Stack", "Queue", "Heap", "Hash Table", "Recursion"
   ])).min(1, 'At least one tag required'),
   visibleTestCases: z.array(
@@ -77,8 +81,8 @@ const Panel = () => {
   const [selectedTags, setSelectedTags] = useState(['Array']);
 
   const availableTags = [
-    "Array", "String", "Dynamic Programming", "Graph", "Tree", 
-    "Math", "Sorting", "Searching", "Backtracking", "Greedy", 
+    "Array", "String", "Dynamic Programming", "Graph", "Tree",
+    "Math", "Sorting", "Searching", "Backtracking", "Greedy",
     "Linked List", "Stack", "Queue", "Heap", "Hash Table", "Recursion"
   ];
 
@@ -141,7 +145,7 @@ const Panel = () => {
 
       await axiosClient.post('/problem/create', payload);
       alert('Problem published to production successfully!');
-      navigate('/');
+      navigate('/admin_panel');
     } catch (error) {
       console.error(error.response?.data || error.message);
       alert(`Failed to create problem: ${error.message}`);
@@ -269,11 +273,10 @@ const Panel = () => {
                           key={tag}
                           type="button"
                           onClick={() => toggleTag(tag)}
-                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            selectedTags.includes(tag)
+                          className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedTags.includes(tag)
                               ? 'bg-indigo-600 text-white shadow-sm'
                               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
-                          }`}
+                            }`}
                         >
                           {tag}
                           {selectedTags.includes(tag) && <X size={12} className="inline ml-1" />}
@@ -455,10 +458,16 @@ const DashboardHome = () => (
       <div className="relative z-10 space-y-8 max-w-2xl">
         <h2 className="text-3xl lg:text-5xl font-black text-white leading-tight">Ready to deploy a new<br /><span className="text-indigo-400">algorithmic feat?</span></h2>
         <p className="text-slate-400 text-lg lg:text-xl font-medium">Create complex multi-language challenges with integrated test case validation in minutes.</p>
-        <Link to="create-problem" className="inline-flex items-center gap-3 bg-white text-slate-900 px-10 py-5 rounded-3xl font-black hover:bg-indigo-50 transition-all hover:scale-105 shadow-2xl">
-          <Plus size={24} strokeWidth={3} />
-          START ARCHITECTING
-        </Link>
+        <div className='flex flex-col gap-8'>
+          <Link to="create-problem" className="inline-flex items-center gap-3 bg-white text-slate-900 px-10 py-5 rounded-3xl font-black hover:bg-indigo-50 transition-all hover:scale-105 shadow-2xl  w-[50%]">
+            <Plus size={24} strokeWidth={3} />
+            START ARCHITECTING
+          </Link>
+          <Link to="update&delete" className="inline-flex items-center gap-3 bg-white text-slate-900 px-10 py-5 rounded-3xl font-black hover:bg-indigo-50 transition-all hover:scale-105 shadow-2xl w-[50%] ">
+            <Pencil size={24} strokeWidth={3} />
+            Refractor and Decommission Architecture
+          </Link>
+        </div>
       </div>
 
       <div className="absolute top-0 right-0 w-125 h-125 bg-indigo-500/10 rounded-full blur-3xl -mr-32 -mt-32 transition-transform group-hover:scale-110"></div>
@@ -472,46 +481,48 @@ const DashboardHome = () => (
 // Main App
 const AdminPanel = () => {
   return (
-      <div className="flex min-h-screen bg-[#fafbfc]">
-        <aside className="w-24 bg-white border-r border-slate-100 hidden lg:flex flex-col items-center py-10 sticky top-0 h-screen gap-12 shadow-sm">
-          <Link to="/" className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
-            <Layout size={24} strokeWidth={3} />
+    <div className="flex min-h-screen bg-[#fafbfc]">
+      <aside className="w-24 bg-white border-r border-slate-100 hidden lg:flex flex-col items-center py-10 sticky top-0 h-screen gap-12 shadow-sm">
+        <Link to="/" className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
+          <Layout size={24} strokeWidth={3} />
+        </Link>
+
+        <nav className="flex-1 flex flex-col gap-6">
+          <Link to="/" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="Dashboard">
+            <LayoutGrid size={24} />
           </Link>
-
-          <nav className="flex-1 flex flex-col gap-6">
-            <Link to="/" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="Dashboard">
-              <LayoutGrid size={24} />
-            </Link>
-            <Link to="/create-problem" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="New Problem">
-              <PlusCircle size={24} />
-            </Link>
-            <div className="p-4 rounded-2xl text-slate-200 cursor-not-allowed" title="Databases Locked">
-              <Database size={24} />
-            </div>
-          </nav>
-
-          <div className="p-4 text-slate-400 hover:text-slate-600 cursor-pointer">
-            <Settings size={24} />
+          <Link to="/create-problem" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="New Problem">
+            <PlusCircle size={24} />
+          </Link>
+          <div className="p-4 rounded-2xl text-slate-200 cursor-not-allowed" title="Databases Locked">
+            <Database size={24} />
           </div>
-        </aside>
+        </nav>
 
-        <main className="flex-1 flex flex-col min-w-0">
-          <header className="h-20 lg:hidden bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 flex items-center justify-between border-b border-slate-100">
-            <Link to="/" className="flex items-center gap-2">
-              <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
-                <Layout size={20} strokeWidth={3} />
-              </div>
-              <span className="font-black text-xl tracking-tighter">CodeForge</span>
-            </Link>
-            <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200"></div>
-          </header>
+        <div className="p-4 text-slate-400 hover:text-slate-600 cursor-pointer">
+          <Settings size={24} />
+        </div>
+      </aside>
 
-          <Routes>
-            <Route index element={<DashboardHome />} />
-            <Route path="create-problem" element={<Panel />} />
-          </Routes>
-        </main>
-      </div>
+      <main className="flex-1 flex flex-col min-w-0">
+        <header className="h-20 lg:hidden bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 flex items-center justify-between border-b border-slate-100">
+          <Link to="/" className="flex items-center gap-2">
+            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
+              <Layout size={20} strokeWidth={3} />
+            </div>
+            <span className="font-black text-xl tracking-tighter">CodeForge</span>
+          </Link>
+          <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200"></div>
+        </header>
+
+        <Routes>
+          <Route index element={<DashboardHome />} />
+          <Route path="create-problem" element={<Panel />} />
+          <Route path='update&delete' element={<AdminUpdateDelete />} />
+          <Route path='update/:problemId' element={<UpdatePanel/>} />
+        </Routes>
+      </main>
+    </div>
   );
 };
 
