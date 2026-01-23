@@ -5,6 +5,8 @@ import authRouter from "./routes/userAuth";
 import redisClient from "./config/reddis_connect";
 import { problemRouter } from "./routes/problemCreation";
 import submitRouter from "./routes/submit";
+import aiRoutes from './routes/aiRoutes.js';
+
 const cors = require('cors');
 
 const app = express();
@@ -21,6 +23,8 @@ app.use(cookieParser())
 app.use('/user', authRouter)
 app.use('/problem', problemRouter)
 app.use('/submission', submitRouter)
+app.use('/ai', aiRoutes);
+
 
 
 

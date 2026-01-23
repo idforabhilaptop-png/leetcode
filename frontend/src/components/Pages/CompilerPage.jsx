@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, Navigate, useParams } from 'react-router';
-// import { useForm } from 'react-hook-form';
 import {
     List,
 
@@ -20,11 +19,8 @@ import {
 import Editor from '@monaco-editor/react';
 import axiosClient from '../../utils/axiosClient';
 import { leetcodeLogo2 } from '../../assets/images';
-import { GoogleGenAI } from "@google/genai";
+import SubmissionHistory from '../compiler/SubmissionHistory';
 
-// --- API CLIENT CONFIG ---
-// Note: Assuming the backend is relative or defined in environment. 
-// For this demo, we use a generic axios instance that matches the user's snippet.
 
 // --- CONSTANTS ---
 const langMap = {
@@ -33,30 +29,16 @@ const langMap = {
     javascript: 'JavaScript'
 };
 
-// --- SERVICES ---
 class GeminiService {
     async askAI(problem, currentCode, userMessage, history) {
-        const ai = new GoogleGenAI({ apiKey: 'AIzaSyC_oyX8_hTOfBOzsO6ya09c8vMOLTQqGhM' });
-        const systemInstruction = `You are a world-class coding mentor.
-      Problem: ${problem?.title}
-      Description: ${problem?.description}
-      Current Code: \`\`\`${currentCode}\`\`\`
-      Help the student with hints and complexity analysis.`;
+        const response = await axiosClient.post('/ai/chat', {
+            problem,
+            currentCode,
+            userMessage,
+            history
+        });
 
-        try {
-            const response = await ai.models.generateContent({
-                model: 'gemini-3-pro-preview',
-                contents: [
-                    ...history.map(m => ({ role: m.role, parts: [{ text: m.text }] })),
-                    { role: 'user', parts: [{ text: userMessage }] }
-                ],
-                config: { systemInstruction, temperature: 0.7 }
-            });
-            return response.text || "I couldn't generate a response.";
-        } catch (e) {
-            console.log("Error", e)
-            return "AI Service Error. Please try again later.";
-        }
+        return response.data.reply;
     }
 }
 const geminiService = new GeminiService();
@@ -87,39 +69,188 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => (
     </div>
 );
 
-const SubmissionHistory = ({ problemId }) => {
-    const [submissions, setSubmissions] = useState([]);
-    const [loading, setLoading] = useState(true);
+// Markdown-like formatter for AI responses with streaming effect
+const FormattedMessage = ({ text, isStreaming = false }) => {
+    const [copiedIndex, setCopiedIndex] = useState(null);
+    const [displayedText, setDisplayedText] = useState('');
+    const [isComplete, setIsComplete] = useState(!isStreaming);
 
     useEffect(() => {
-        const fetchHistory = async () => {
-            try {
-                // Simulating the call from user's snippet
-                const response = await axiosClient.get(`/submission/history/${problemId}`);
-                setSubmissions(response.data || []);
-            } catch (e) {
-                console.log("Error", e)
-                setSubmissions([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchHistory();
-    }, [problemId]);
+        if (!isStreaming) {
+            setDisplayedText(text);
+            setIsComplete(true);
+            return;
+        }
 
-    if (loading) return <div className="text-gray-500 animate-pulse text-xs">Loading history...</div>;
-    if (submissions.length === 0) return <div className="text-gray-500 text-xs">No submission records found.</div>;
+        let currentIndex = 0;
+        setDisplayedText('');
+        setIsComplete(false);
+
+        const interval = setInterval(() => {
+            if (currentIndex < text.length) {
+                setDisplayedText(text.slice(0, currentIndex + 1));
+                currentIndex++;
+            } else {
+                setIsComplete(true);
+                clearInterval(interval);
+            }
+        }, 15);
+
+        return () => clearInterval(interval);
+    }, [text, isStreaming]);
+
+    const textToDisplay = isStreaming ? displayedText : text;
+
+    const formatText = (textInput) => {
+        const parts = [];
+        let lastIndex = 0;
+
+        // Match code blocks with ```
+        const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+        let match;
+
+        while ((match = codeBlockRegex.exec(textInput)) !== null) {
+            // Add text before code block
+            if (match.index > lastIndex) {
+                parts.push({
+                    type: 'text',
+                    content: textInput.substring(lastIndex, match.index)
+                });
+            }
+
+            // Add code block
+            parts.push({
+                type: 'code',
+                language: match[1] || 'text',
+                content: match[2].trim()
+            });
+
+            lastIndex = match.index + match[0].length;
+        }
+
+        // Add remaining text
+        if (lastIndex < textInput.length) {
+            parts.push({
+                type: 'text',
+                content: textInput.substring(lastIndex)
+            });
+        }
+
+        return parts.length > 0 ? parts : [{ type: 'text', content: textInput }];
+    };
+
+    const formatTextContent = (content) => {
+        // Split by newlines to process line by line
+        const lines = content.split('\n');
+        const formatted = [];
+
+        lines.forEach((line, idx) => {
+            // Headers
+            if (line.startsWith('# ')) {
+                formatted.push(<h1 key={idx} className="text-lg font-bold mt-2 mb-1">{line.substring(2)}</h1>);
+            } else if (line.startsWith('## ')) {
+                formatted.push(<h2 key={idx} className="text-base font-bold mt-2 mb-1">{line.substring(3)}</h2>);
+            } else if (line.startsWith('### ')) {
+                formatted.push(<h3 key={idx} className="text-sm font-bold mt-1 mb-0.5">{line.substring(4)}</h3>);
+            }
+            // Bold text
+            else if (line.includes('**')) {
+                const parts = line.split(/(\*\*.*?\*\*)/g);
+                formatted.push(
+                    <p key={idx} className="mb-1">
+                        {parts.map((part, i) =>
+                            part.startsWith('**') && part.endsWith('**')
+                                ? <strong key={i}>{part.slice(2, -2)}</strong>
+                                : part
+                        )}
+                    </p>
+                );
+            }
+            // Inline code
+            else if (line.includes('`')) {
+                const parts = line.split(/(`[^`]+`)/g);
+                formatted.push(
+                    <p key={idx} className="mb-1">
+                        {parts.map((part, i) =>
+                            part.startsWith('`') && part.endsWith('`')
+                                ? <code key={i} className="bg-[#1e1e1e] px-1.5 py-0.5 rounded text-blue-300 font-mono text-xs">{part.slice(1, -1)}</code>
+                                : part
+                        )}
+                    </p>
+                );
+            }
+            // Bullet points
+            else if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+                formatted.push(
+                    <li key={idx} className="ml-4 mb-0.5 list-disc">{line.trim().substring(2)}</li>
+                );
+            }
+            // Numbered lists
+            else if (/^\d+\.\s/.test(line.trim())) {
+                formatted.push(
+                    <li key={idx} className="ml-4 mb-0.5 list-decimal">{line.trim().replace(/^\d+\.\s/, '')}</li>
+                );
+            }
+            // Empty line - remove this to reduce spacing
+            else if (line.trim() === '') {
+                // Skip empty lines or use smaller spacing
+                return;
+            }
+            // Regular text
+            else {
+                formatted.push(<p key={idx} className="mb-1">{line}</p>);
+            }
+        });
+
+        return formatted;
+    };
+
+    const copyToClipboard = async (code, index) => {
+        await navigator.clipboard.writeText(code);
+        setCopiedIndex(index);
+        setTimeout(() => setCopiedIndex(null), 2000);
+    };
+
+    const parts = formatText(textToDisplay);
 
     return (
         <div className="space-y-2">
-            {submissions.map((sub, i) => (
-                <div key={i} className="flex justify-between items-center p-3 bg-[#333333] rounded border border-[#3e3e3e]">
-                    <span className={sub.accepted ? 'text-emerald-500 font-bold' : 'text-red-500'}>
-                        {sub.accepted ? 'Accepted' : 'Failed'}
-                    </span>
-                    <span className="text-xs text-gray-500">{sub.timestamp}</span>
-                </div>
-            ))}
+            {parts.map((part, index) => {
+                if (part.type === 'code') {
+                    return (
+                        <div key={index} className="relative group">
+                            <div className="flex items-center justify-between bg-[#1e1e1e] px-3 py-1.5 rounded-t-lg border-b border-[#2a2a2a]">
+                                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                                    {part.language}
+                                </span>
+                                <button
+                                    onClick={() => copyToClipboard(part.content, index)}
+                                    className="text-gray-500 hover:text-gray-300 transition-colors p-1"
+                                    title="Copy code"
+                                >
+                                    {copiedIndex === index ? (
+                                        <Check size={14} className="text-green-400" />
+                                    ) : (
+                                        <Copy size={14} />
+                                    )}
+                                </button>
+                            </div>
+                            <pre className="bg-[#1e1e1e] p-3 rounded-b-lg overflow-x-auto">
+                                <code className="text-xs font-mono text-gray-300 leading-relaxed">
+                                    {part.content}
+                                </code>
+                            </pre>
+                        </div>
+                    );
+                } else {
+                    return (
+                        <div key={index} className="text-gray-200 leading-relaxed">
+                            {formatTextContent(part.content)}
+                        </div>
+                    );
+                }
+            })}
+            {!isComplete && <span className="inline-block w-1 h-4 bg-gray-400 animate-pulse ml-1">|</span>}
         </div>
     );
 };
@@ -134,22 +265,36 @@ const ChatAi = ({ problem, currentCode }) => {
 
     const handleSend = async () => {
         if (!input.trim() || loading) return;
-        const userMsg = { role: 'user', text: input };
+
+        const userMsg = { role: 'user', text: input, isStreaming: false };
         setMessages(prev => [...prev, userMsg]);
         setInput('');
         setLoading(true);
+
+        // Add placeholder for streaming
+        const messageId = Date.now();
+        setMessages(prev => [...prev, { role: 'model', text: '', isStreaming: true, id: messageId }]);
+
+        // Call your Gemini API
         const reply = await geminiService.askAI(problem, currentCode, input, messages);
-        setMessages(prev => [...prev, { role: 'model', text: reply }]);
+
+        // Update with the full response (streaming will happen automatically)
+        setMessages(prev =>
+            prev.map(msg =>
+                msg.id === messageId
+                    ? { ...msg, text: reply, isStreaming: true }
+                    : msg
+            )
+        );
         setLoading(false);
     };
-
     return (
         <div className="flex flex-col h-125 border border-[#3e3e3e] rounded-lg bg-[#282828] overflow-hidden shadow-xl">
             <div className="flex-1 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
                 {messages.map((m, i) => (
                     <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={`max-w-[85%] p-3 rounded-2xl text-xs leading-relaxed ${m.role === 'user' ? 'bg-blue-600' : 'bg-[#333333] border border-[#444]'}`}>
-                            {m.text}
+                            {m.role === 'user' ? m.text : <FormattedMessage text={m.text} isStreaming={m.isStreaming} />}
                         </div>
                     </div>
                 ))}

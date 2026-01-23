@@ -270,9 +270,9 @@ function ProblemPage() {
                                         </div>
 
                                         {/* Tags */}
-                                        <div className="col-span-3 flex items-center">
+                                        <div className="col-span-3 flex items-center gap-1">
                                             <span className="px-2.5 py-1 bg-gray-100 text-gray-700 rounded text-xs">
-                                                {problem.tags}
+                                                {`${problem.tags} `}
                                             </span>
                                         </div>
 
