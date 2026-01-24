@@ -1,9 +1,5 @@
-
-
-// const Submission = require("../models/submission");
-// const SolutionVideo = require("../models/solutionVideo")
-
 const { default: Problem } = require("../models/problems");
+const { default: SolutionVideo } = require("../models/solutionVideo");
 const { default: Submission } = require("../models/submission");
 const { default: User } = require("../models/users");
 const { getLanguageById, submitBatch, submitToken } = require("../utils/problemUtility");
@@ -39,7 +35,7 @@ const createProblem = async (req, res) => {
 
 
       const submitResult = await submitBatch(submissions);
-      
+
       const resultToken = submitResult.map((value) => value.token);
 
       // ["db54881d-bcf5-4c7b-a2e3-d33fe7e25de7","ecc52a9b-ea80-4a00-ad50-4ab6cc3bb2a1","1b35ec3b-5776-48ef-b646-d5522bdeb2cc"]
@@ -75,15 +71,15 @@ const createProblem = async (req, res) => {
 
 const updateProblem = async (req, res) => {
   const { id } = req.params;
-  const { 
-    title, 
-    description, 
-    difficulty, 
+  const {
+    title,
+    description,
+    difficulty,
     tags,
-    visibleTestCases, 
-    invisibleTestCases, 
+    visibleTestCases,
+    invisibleTestCases,
     startCode,
-    referenceSolution, 
+    referenceSolution,
   } = req.body;
 
   try {
@@ -148,8 +144,8 @@ const updateProblem = async (req, res) => {
     };
 
     const newProblem = await Problem.findByIdAndUpdate(
-      id, 
-      updateData, 
+      id,
+      updateData,
       { runValidators: true, new: true }
     );
 
@@ -160,9 +156,9 @@ const updateProblem = async (req, res) => {
     });
   } catch (err) {
     console.error("Update problem error:", err);
-    res.status(500).json({ 
-      error: "Internal server error", 
-      message: err.message 
+    res.status(500).json({
+      error: "Internal server error",
+      message: err.message
     });
   }
 };
@@ -205,19 +201,19 @@ const getProblemById = async (req, res) => {
     if (!getProblem)
       return res.status(404).send("Problem is Missing");
 
-    //  const videos = await SolutionVideo.findOne({problemId:id});
+    const videos = await SolutionVideo.findOne({ problemId: id });
 
-    //  if(videos){   
+    if (videos) {
 
-    //  const responseData = {
-    //   ...getProblem.toObject(),
-    //   secureUrl:videos.secureUrl,
-    //   thumbnailUrl : videos.thumbnailUrl,
-    //   duration : videos.duration,
-    //  } 
+      const responseData = {
+        ...getProblem.toObject(),
+        secureUrl: videos.secureUrl,
+        thumbnailUrl: videos.thumbnailUrl,
+        duration: videos.duration,
+      }
 
-    //  return res.status(200).send(responseData);
-    //  }
+      return res.status(200).send(responseData);
+    }
 
     res.status(200).send(getProblem);
 
@@ -261,29 +257,29 @@ const solvedAllProblembyUser = async (req, res) => {
 
   }
   catch (err) {
-    res.status(500).send("Error:"+err);
+    res.status(500).send("Error:" + err);
   }
 }
 
 
-const submittedProblem = async(req,res)=>{
+const submittedProblem = async (req, res) => {
 
-  try{
+  try {
 
     const userId = req.result._id;
     const problemId = req.params.pid;
 
-   const ans = await Submission.find({userId,problemId});
+    const ans = await Submission.find({ userId, problemId });
 
-  if(ans.length==0)
-    return res.status(200).send("No Submission is present");
+    if (ans.length == 0)
+      return res.status(200).send("No Submission is present");
 
-  return res.status(200).send(ans);
+    return res.status(200).send(ans);
 
   }
-  catch(err){
-     res.status(500).send("Internal Server Error :",err.message);
+  catch (err) {
+    res.status(500).send("Internal Server Error :", err.message);
   }
 }
 
-module.exports = { createProblem, updateProblem ,deleteProblem,getProblemById,getAllProblem,solvedAllProblembyUser,submittedProblem };
+module.exports = { createProblem, updateProblem, deleteProblem, getProblemById, getAllProblem, solvedAllProblembyUser, submittedProblem };

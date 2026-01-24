@@ -45,30 +45,6 @@ const geminiService = new GeminiService();
 
 // --- SUB-COMPONENTS ---
 
-const Editorial = ({ secureUrl, thumbnailUrl, duration }) => (
-    <div className="space-y-6">
-        <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold">Solution Editorial</h2>
-            <span className="text-xs text-gray-500 flex items-center"><BookOpen size={12} className="mr-1" /> {duration}</span>
-        </div>
-        <div className="aspect-video bg-[#333333] rounded-xl flex items-center justify-center overflow-hidden border border-[#3e3e3e] relative group cursor-pointer">
-            {thumbnailUrl ? (
-                <img src={thumbnailUrl} alt="Video Preview" className="w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity" />
-            ) : (
-                <div className="bg-linear-to-br from-gray-700 to-gray-800 w-full h-full opacity-30" />
-            )}
-            <Play size={48} className="absolute text-white/50 group-hover:text-white/80 transition-all" />
-        </div>
-        <div className="text-gray-300 leading-relaxed text-sm">
-            {secureUrl ? (
-                <a href={secureUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">View Official Resource</a>
-            ) : (
-                "The detailed explanation for this problem covers the optimal approach and time complexity analysis."
-            )}
-        </div>
-    </div>
-);
-
 // Markdown-like formatter for AI responses with streaming effect
 const FormattedMessage = ({ text, isStreaming = false }) => {
     const [copiedIndex, setCopiedIndex] = useState(null);
@@ -314,6 +290,89 @@ const ChatAi = ({ problem, currentCode }) => {
     );
 };
 
+const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    // Extract URL from img tag and convert video URL to thumbnail
+    const getThumbnailUrl = (imgString, videoUrl) => {
+        if (!imgString && !videoUrl) return null;
+        
+        // Extract URL from img tag if it exists
+        let url = videoUrl;
+        if (imgString) {
+            const srcMatch = imgString.match(/src=['"]([^'"]+)['"]/);
+            url = srcMatch ? srcMatch[1] : videoUrl;
+        }
+        
+        if (!url) return null;
+        
+        // Convert Cloudinary video URL to thumbnail image URL
+        if (url.includes('cloudinary.com/')) {
+            return url.replace(
+                '/video/upload/',
+                '/video/upload/so_0,w_800,h_450,c_fill,q_auto,f_jpg/'
+            );
+        }
+        
+        return url;
+    };
+
+    const actualThumbnailUrl = getThumbnailUrl(thumbnailUrl, secureUrl);
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <h2 className="text-xl font-bold">Solution Editorial</h2>
+                <span className="text-xs text-gray-500 flex items-center">
+                    <BookOpen size={12} className="mr-1" /> {duration}
+                </span>
+            </div>
+            
+            {isPlaying && secureUrl ? (
+                <div className="aspect-video bg-black rounded-xl overflow-hidden border border-[#3e3e3e]">
+                    <video 
+                        className="w-full h-full"
+                        controls
+                        controlsList="nodownload"
+                        autoPlay
+                        src={secureUrl}
+                        onContextMenu={(e) => e.preventDefault()}
+                    >
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            ) : (
+                <div 
+                    onClick={() => secureUrl && setIsPlaying(true)}
+                    className="aspect-video bg-[#333333] rounded-xl flex items-center justify-center overflow-hidden border border-[#3e3e3e] relative group cursor-pointer"
+                >
+                    {actualThumbnailUrl ? (
+                        <img 
+                            src={actualThumbnailUrl} 
+                            alt="Video Preview" 
+                            className="w-full h-full object-cover opacity-30 group-hover:opacity-40 transition-opacity" 
+                        />
+                    ) : (
+                        <div className="bg-linear-to-br from-gray-700 to-gray-800 w-full h-full opacity-30" />
+                    )}
+                    <Play size={48} className="absolute text-white/50 group-hover:text-white/80 transition-all" />
+                </div>
+            )}
+            
+            <div className="text-gray-300 leading-relaxed text-sm">
+                {secureUrl ? (
+                    isPlaying ? (
+                        "Playing video..."
+                    ) : (
+                        <span className="text-gray-400">Click above to watch the video explanation</span>
+                    )
+                ) : (
+                    "The detailed explanation for this problem covers the optimal approach and time complexity analysis."
+                )}
+            </div>
+        </div>
+    );
+};
 // --- MAIN PAGE COMPONENT ---
 
 const CompilerPage = () => {
@@ -428,7 +487,7 @@ const CompilerPage = () => {
             </div>
         );
     }
-
+  
     return (
         <div className="h-screen flex flex-col bg-[#1a1a1a] text-gray-200">
             {/* Navbar Integration */}
@@ -447,8 +506,6 @@ const CompilerPage = () => {
                     </Link>
                 </div>
                 <div className="flex items-center space-x-3">
-                    <Settings size={18} className="text-gray-400 cursor-pointer hover:text-white transition-colors" />
-                    <Bell size={18} className="text-gray-400 cursor-pointer hover:text-white transition-colors" />
                     <div className="w-8 h-8 bg-[#3e3e3e] rounded-full flex items-center justify-center cursor-pointer hover:bg-[#4a4a4a] transition-colors"><User size={18} /></div>
                 </div>
             </nav>
