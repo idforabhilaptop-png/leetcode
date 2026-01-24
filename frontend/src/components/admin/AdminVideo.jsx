@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Layers, Zap, Flame, Leaf, Code2, Pencil, Trash, Loader2 } from 'lucide-react';
+import { Layers, Zap, Flame, Leaf, Code2, Pencil, Trash, Loader2, Upload } from 'lucide-react';
 import axiosClient from '../../utils/axiosClient';
 import { useNavigate } from 'react-router';
 
-const AdminUpdateDelete = () => {
+const AdminVideo = () => {
     const [problems, setProblems] = useState([]);
     const [loading, setLoading] = useState(true);
     // eslint-disable-next-line no-unused-vars
     const [isDeleting, setIsDeleting] = useState(null);
     // eslint-disable-next-line no-unused-vars
-    const [isUpdating, setIsUpdating] = useState(null)
+    const [isUploading, setIsUploading] = useState(null)
     const [error, setError] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [difficultyFilter, setDifficultyFilter] = useState('All');
@@ -21,11 +21,11 @@ const AdminUpdateDelete = () => {
         navigate('/admin_panel/create-problem');
     };
 
-    const handleUpdate = async (id) => {
+    const handleUpload = async (id) => {
         try {
-            navigate(`/admin_panel/update/${id}`)
+            navigate(`/admin_panel/upload/${id}`)
         } catch (err) {
-            setError('Failed to Update problem');
+            setError('Failed to Upload problem');
             console.error(err);
         }
     }
@@ -48,16 +48,16 @@ const AdminUpdateDelete = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('Are you sure you want to delete this problem?')) return;
+        if (!window.confirm('Are you sure you want to delete the video?')) return;
 
         try {
-            await axiosClient.delete(`/problem/delete/${id}`);
+            await axiosClient.delete(`/video/delete/${id}`);
             setProblems(problems.filter(problem => problem._id !== id));
-            window.alert("Problem Deleted Successfully")
+            window.alert("Video deleted Succesfully")
         } catch (err) {
-            setError('Failed to delete problem');
-            console.error(err);
-            window.alert("Unable to delete problem")
+            setError(err);
+            console.log(err);
+            window.alert(err.response.data.error)
             navigate('/admin_panel')
         }
     };
@@ -128,8 +128,8 @@ const AdminUpdateDelete = () => {
                 {/* Header Section */}
                 <div className="mb-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                     <div>
-                        <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">Challenge Library</h1>
-                        <p className="text-gray-500 font-medium">Audit and manage technical assessment content.</p>
+                        <h1 className="text-4xl font-black text-gray-900 tracking-tight mb-2">Solution Library</h1>
+                        <p className="text-gray-500 font-medium">Upload and Delete Video Solutions from here.</p>
                     </div>
                     <div className="flex items-center gap-3">
                         <button onClick={fetchProblems} className="px-5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-gray-600 hover:bg-gray-50 transition-all flex items-center space-x-2 shadow-sm active:scale-95">
@@ -273,15 +273,15 @@ const AdminUpdateDelete = () => {
                                             <td className="px-6 py-5">
                                                 <div className="flex items-center justify-center gap-2">
                                                     <button
-                                                        onClick={() => handleUpdate(problem._id)}
-                                                        disabled={isUpdating === problem._id}
+                                                        onClick={() => handleUpload(problem._id)}
+                                                        disabled={isUploading === problem._id}
                                                         className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200 active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed"
                                                         title="Update Problem"
                                                     >
-                                                        {isUpdating === problem._id ? (
+                                                        {isUploading === problem._id ? (
                                                             <Loader2 className="animate-spin" size={18} />
                                                         ) : (
-                                                            <Pencil size={18} />
+                                                            <Upload size={18} />
                                                         )}
                                                     </button>
                                                     <button
@@ -319,5 +319,4 @@ const AdminUpdateDelete = () => {
     );
 };
 
-export default AdminUpdateDelete
-
+export default AdminVideo

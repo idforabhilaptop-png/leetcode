@@ -6,6 +6,7 @@ import redisClient from "./config/reddis_connect";
 import { problemRouter } from "./routes/problemCreation";
 import submitRouter from "./routes/submit";
 import aiRoutes from './routes/aiRoutes.js';
+import videoRouter from "./routes/videoCreator.js";
 
 const cors = require('cors');
 
@@ -24,6 +25,7 @@ app.use('/user', authRouter)
 app.use('/problem', problemRouter)
 app.use('/submission', submitRouter)
 app.use('/ai', aiRoutes);
+app.use('/video',videoRouter)
 
 
 

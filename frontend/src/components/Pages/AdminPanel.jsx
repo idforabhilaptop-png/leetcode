@@ -1,6 +1,6 @@
 
 import { useState } from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router';
+import { Routes, Route, Link, useNavigate, NavLink } from 'react-router';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -8,12 +8,15 @@ import {
   Plus, Trash2, Code2, FileText, Beaker, ChevronRight, Info,
   CheckCircle2, AlertCircle, Code, Layout, LayoutGrid,
   Database, Users, Settings, PlusCircle, ArrowLeft, Send, X,
-  Pencil,
-  Trash
+  Pencil, Trash, Video,
+  Home,
+  Puzzle
 } from 'lucide-react';
 import axiosClient from '../../utils/axiosClient';
 import AdminUpdateDelete from '../admin/AdminUpdateDelete';
 import UpdatePanel from '../admin/UpdatePanel';
+import AdminVideo from '../admin/AdminVideo';
+import UploadVideoPanel from '../admin/UploadVideoPanel';
 
 
 
@@ -186,7 +189,7 @@ const Panel = () => {
         <div className="flex items-center gap-4">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/admin_panel')}
             className="px-6 py-3 text-slate-500 hover:text-slate-900 font-bold transition-all flex items-center gap-2"
           >
             <ArrowLeft size={20} /> Cancel
@@ -274,8 +277,8 @@ const Panel = () => {
                           type="button"
                           onClick={() => toggleTag(tag)}
                           className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${selectedTags.includes(tag)
-                              ? 'bg-indigo-600 text-white shadow-sm'
-                              : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
+                            ? 'bg-indigo-600 text-white shadow-sm'
+                            : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                             }`}
                         >
                           {tag}
@@ -467,6 +470,10 @@ const DashboardHome = () => (
             <Pencil size={24} strokeWidth={3} />
             Refractor and Decommission Architecture
           </Link>
+          <Link to="upload&delete" className="inline-flex items-center gap-3 bg-white text-slate-900 px-10 py-5 rounded-3xl font-black hover:bg-indigo-50 transition-all hover:scale-105 shadow-2xl w-[50%] ">
+            <Video size={24} strokeWidth={3} />
+            Editorial Handling
+          </Link>
         </div>
       </div>
 
@@ -483,26 +490,57 @@ const AdminPanel = () => {
   return (
     <div className="flex min-h-screen bg-[#fafbfc]">
       <aside className="w-24 bg-white border-r border-slate-100 hidden lg:flex flex-col items-center py-10 sticky top-0 h-screen gap-12 shadow-sm">
-        <Link to="/" className="w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl">
-          <Layout size={24} strokeWidth={3} />
-        </Link>
 
         <nav className="flex-1 flex flex-col gap-6">
-          <Link to="/" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="Dashboard">
-            <LayoutGrid size={24} />
-          </Link>
-          <Link to="create-problem" className="p-4 rounded-2xl text-slate-400 hover:bg-slate-50 hover:text-indigo-600 transition-all" title="New Problem">
+          <NavLink to="/admin_panel" className='w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-white shadow-xl'>
+            <Home size={24} strokeWidth={3} />
+          </NavLink>
+          <NavLink to="/admin_panel/create-problem" className={({ isActive }) =>
+            `
+      p-4 rounded-2xl transition-all
+      ${isActive
+              ? "bg-slate-50 text-indigo-600"
+              : "text-slate-400 hover:bg-slate-50 hover:text-indigo-600"
+            }
+    `
+          }
+            title="New Problem">
             <PlusCircle size={24} />
-          </Link>
-          <div className="p-4 rounded-2xl text-slate-200 cursor-not-allowed" title="Databases Locked">
-            <Database size={24} />
-          </div>
+          </NavLink>
+          <NavLink to="/admin_panel/update&delete" className={({ isActive }) =>
+            `
+      p-4 rounded-2xl transition-all
+      ${isActive
+              ? "bg-slate-50 text-indigo-600"
+              : "text-slate-400 hover:bg-slate-50 hover:text-indigo-600"
+            }
+    `
+          }
+            title="Dashboard">
+            <LayoutGrid size={24} />
+          </NavLink>
+          <NavLink to="/admin_panel/upload&delete" className={({ isActive }) =>
+            `
+      p-4 rounded-2xl transition-all
+      ${isActive
+              ? "bg-slate-50 text-indigo-600"
+              : "text-slate-400 hover:bg-slate-50 hover:text-indigo-600"
+            }
+    `
+          }
+            title="Dashboard">
+            <Video size={24} />
+          </NavLink>
+
         </nav>
 
         <div className="p-4 text-slate-400 hover:text-slate-600 cursor-pointer">
-          <Settings size={24} />
+          <NavLink to='/problems'>
+            <Puzzle size={24} />
+          </NavLink>
+
         </div>
-      </aside>
+      </aside >
 
       <main className="flex-1 flex flex-col min-w-0">
         <header className="h-20 lg:hidden bg-white/80 backdrop-blur-md sticky top-0 z-50 px-6 flex items-center justify-between border-b border-slate-100">
@@ -510,7 +548,7 @@ const AdminPanel = () => {
             <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
               <Layout size={20} strokeWidth={3} />
             </div>
-            <span className="font-black text-xl tracking-tighter">CodeForge</span>
+            <span className="font-black text-xl tracking-tighter text-black">CodeForge</span>
           </Link>
           <div className="w-10 h-10 rounded-full bg-slate-100 border border-slate-200"></div>
         </header>
@@ -519,10 +557,12 @@ const AdminPanel = () => {
           <Route index element={<DashboardHome />} />
           <Route path="create-problem" element={<Panel />} />
           <Route path='update&delete' element={<AdminUpdateDelete />} />
-          <Route path='update/:problemId' element={<UpdatePanel/>} />
+          <Route path='update/:problemId' element={<UpdatePanel />} />
+          <Route path='upload&delete' element={<AdminVideo />} />
+          <Route path='upload/:problemId' element={<UploadVideoPanel />} />
         </Routes>
       </main>
-    </div>
+    </div >
   );
 };
 
